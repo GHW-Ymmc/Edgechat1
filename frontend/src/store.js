@@ -8,6 +8,8 @@ import {
 import { isDemoMode, runtimeSessionToken } from './runtime.js';
 import api from './api.js';
 import { applySiteMetadata } from './site-metadata.js';
+import { normalizeSiteColorTheme } from '../../shared/site-theme.ts';
+import { applySiteColorTheme } from './site-theme.ts';
 import { hasDocumentSession, isGatewayMode } from './gateway.ts';
 import {
   addAuthInvalidListener,
@@ -41,7 +43,8 @@ const state = reactive({
   session: null,
   site: {
     siteName: 'Edgechat',
-    siteIconUrl: ''
+    siteIconUrl: '',
+    colorTheme: 'default'
   }
 });
 
@@ -154,8 +157,10 @@ function refreshAuthorization() {
 function setSite(site) {
   state.site = {
     siteName: String(site?.siteName || 'Edgechat').trim() || 'Edgechat',
-    siteIconUrl: String(site?.siteIconUrl || '').trim()
+    siteIconUrl: String(site?.siteIconUrl || '').trim(),
+    colorTheme: normalizeSiteColorTheme(site?.colorTheme)
   };
+  applySiteColorTheme(state.site.colorTheme);
   applySiteMetadata(state.site);
 }
 

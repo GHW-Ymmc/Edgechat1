@@ -21,7 +21,7 @@ export const ADMIN_POLICIES = [
   policy('storage.scan', 'POST', 'storage/scan', ['storage.scan'], { fields: [], audit: true }),
   policy('storage.read', 'GET', 'storage', ['storage.read']),
   policy('site.read', 'GET', 'site-settings', ['site.read']),
-  policy('site.update', 'PATCH', 'site-settings', ['site.appearance.update'], { fields: ['siteName', 'siteIconUrl'], audit: true }),
+  policy('site.update', 'PATCH', 'site-settings', ['site.appearance.update'], { fields: ['siteName', 'siteIconUrl', 'colorTheme'], audit: true }),
   policy('telegram.read', 'GET', 'telegram', ['telegram.read']),
   policy('telegram.config', 'PUT', 'telegram/config', [], { superOnly: true, fields: ['botToken'], audit: true }),
   policy('telegram.create', 'POST', 'telegram/mappings', ['telegram.mappings.manage'], { scope: 'group', fields: ['channelId', 'telegramChatId'], audit: true }),

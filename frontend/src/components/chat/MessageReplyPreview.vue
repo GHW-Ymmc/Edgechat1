@@ -47,9 +47,9 @@ const previewText = computed(() => {
 	min-width: 0;
 	padding: 5px 8px;
 	border: 0;
-	border-left: 3px solid #008069;
+	border-left: 3px solid var(--site-brand, #008069);
 	border-radius: 4px;
-	background: rgba(0, 128, 105, 0.08);
+	background: rgba(var(--site-brand-rgb, 0, 128, 105), 0.08);
 	font: inherit;
 	text-align: left;
 }
@@ -60,11 +60,11 @@ const previewText = computed(() => {
 
 .message-reply-preview--clickable:hover,
 .message-reply-preview--clickable:focus-visible {
-	background: rgba(0, 128, 105, 0.14);
+	background: rgba(var(--site-brand-rgb, 0, 128, 105), 0.14);
 }
 
 .message-reply-preview--clickable:focus-visible {
-	outline: 2px solid rgba(0, 128, 105, 0.35);
+	outline: 2px solid rgba(var(--site-brand-rgb, 0, 128, 105), 0.35);
 	outline-offset: 1px;
 }
 
@@ -76,7 +76,7 @@ const previewText = computed(() => {
 }
 
 .message-reply-preview__sender {
-	color: #008069;
+	color: var(--site-brand, #008069);
 	font-size: 12px;
 	font-weight: 700;
 }

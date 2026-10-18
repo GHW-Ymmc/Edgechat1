@@ -15,7 +15,7 @@
   touch-action: manipulation;
 }
 .profile-avatar-trigger:focus-visible {
-  outline: 2px solid #008069;
+  outline: 2px solid var(--site-brand, #008069);
   outline-offset: 2px;
 }
 .profile-bio-input { resize: vertical; min-height: 100px; font: inherit; }
@@ -69,7 +69,7 @@
   border-radius: 10px;
   min-height: 38px;
   padding: 0 16px;
-  background: #3b82f6;
+  background: var(--site-brand, #3b82f6);
   color: #fff;
   display: inline-flex;
   align-items: center;
@@ -81,7 +81,7 @@
 }
 
 .ui-button:hover:not(:disabled) {
-  background: #2563eb;
+  background: var(--site-brand-hover, #2563eb);
 }
 
 .ui-button:disabled {
@@ -163,8 +163,8 @@ select.ui-input {
 .ui-input:focus,
 .ui-textarea:focus,
 select.ui-input:focus {
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  border-color: var(--site-brand, #3b82f6);
+  box-shadow: 0 0 0 3px rgba(var(--site-brand-rgb, 59, 130, 246), 0.1);
   background: #fff;
 }
 
@@ -190,9 +190,9 @@ select.ui-input {
 .ui-input:focus,
 .ui-textarea:focus,
 select.ui-input:focus {
-  border-color: rgba(45, 156, 151, 0.42);
+  border-color: rgba(var(--site-brand-rgb, 45, 156, 151), 0.42);
   box-shadow:
-    0 0 0 3px rgba(45, 156, 151, 0.14),
+    0 0 0 3px rgba(var(--site-brand-rgb, 45, 156, 151), 0.14),
     inset 0 1px 0 rgba(255, 255, 255, 0.4);
 }
 
@@ -238,9 +238,9 @@ select.ui-input:focus {
 
 .ui-select--open .ui-select__trigger,
 .ui-select__trigger:focus-visible {
-  border-color: rgba(45, 156, 151, 0.42);
+  border-color: rgba(var(--site-brand-rgb, 45, 156, 151), 0.42);
   box-shadow:
-    0 0 0 3px rgba(45, 156, 151, 0.14),
+    0 0 0 3px rgba(var(--site-brand-rgb, 45, 156, 151), 0.14),
     inset 0 1px 0 rgba(255, 255, 255, 0.4);
 }
 
@@ -295,7 +295,7 @@ select.ui-input:focus {
   overflow: auto;
   overscroll-behavior: contain;
   scrollbar-width: thin;
-  scrollbar-color: rgba(45, 156, 151, 0.34) transparent;
+  scrollbar-color: rgba(var(--site-brand-rgb, 45, 156, 151), 0.34) transparent;
 }
 
 .ui-select__panel::-webkit-scrollbar {
@@ -304,7 +304,7 @@ select.ui-input:focus {
 
 .ui-select__panel::-webkit-scrollbar-thumb {
   border-radius: 999px;
-  background: linear-gradient(180deg, rgba(45, 156, 151, 0.42), rgba(45, 156, 151, 0.2));
+  background: linear-gradient(180deg, rgba(var(--site-brand-rgb, 45, 156, 151), 0.42), rgba(var(--site-brand-rgb, 45, 156, 151), 0.2));
 }
 
 .ui-select__panel::-webkit-scrollbar-track {
@@ -403,9 +403,9 @@ select.ui-input:focus {
   justify-content: center;
   overflow: hidden;
   border: 1px solid rgba(255, 255, 255, 0.42);
-  background:
+  background: var(--site-avatar,
     linear-gradient(180deg, rgba(198, 223, 246, 0.62), rgba(183, 225, 222, 0.46)),
-    rgba(255, 255, 255, 0.24);
+    rgba(255, 255, 255, 0.24));
   box-shadow: var(--shadow-sm);
   color: var(--text);
   font-size: 0.82rem;
@@ -454,7 +454,7 @@ select.ui-input:focus {
 }
 
 .ui-dot--cool {
-  background: rgba(45, 156, 151, 0.88);
+  background: rgba(var(--site-brand-rgb, 45, 156, 151), 0.88);
 }
 
 .ui-dot--danger {

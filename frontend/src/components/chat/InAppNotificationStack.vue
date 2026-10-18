@@ -99,7 +99,7 @@ const { t } = useI18n();
 	}
 
 	.in-app-notification--attention {
-		border-left: 4px solid #3390ec;
+		border-left: 4px solid var(--site-brand, #3390ec);
 	}
 
 	.in-app-notification__content {
@@ -122,7 +122,7 @@ const { t } = useI18n();
 
 	.in-app-notification__content:focus-visible,
 	.in-app-notification__dismiss:focus-visible {
-		outline: 2px solid #3390ec;
+		outline: 2px solid var(--site-brand, #3390ec);
 		outline-offset: -2px;
 	}
 
@@ -152,7 +152,7 @@ const { t } = useI18n();
 	align-items: center;
 	gap: 4px;
 	min-width: 0;
-		color: #3390ec;
+		color: var(--site-brand, #3390ec);
 	font-size: 12px;
 	line-height: 1.35;
 }

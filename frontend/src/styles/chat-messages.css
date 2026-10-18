@@ -122,12 +122,12 @@
 .chat-bubble__attachment {
   display: inline-flex;
   margin-top: 10px;
-  color: #2e82d2;
+  color: var(--site-link, #2e82d2);
   font-weight: 600;
 }
 
 .chat-bubble--own .chat-bubble__attachment {
-  color: #2e82d2;
+  color: var(--site-link, #2e82d2);
 }
 
 .chat-composer-shell {

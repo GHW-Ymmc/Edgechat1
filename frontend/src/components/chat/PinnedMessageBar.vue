@@ -64,7 +64,7 @@ const preview = computed(() => {
   padding: 8px 16px;
   border: 0;
   background: transparent;
-  color: #008069;
+  color: var(--site-brand, #008069);
   text-align: left;
   cursor: pointer;
   touch-action: manipulation;
@@ -91,7 +91,7 @@ const preview = computed(() => {
 }
 
 .pinned-message-bar__copy strong {
-  color: #008069;
+  color: var(--site-brand, #008069);
   font-size: 13px;
   font-weight: 600;
 }
@@ -118,7 +118,7 @@ const preview = computed(() => {
 
 .pinned-message-bar__content:focus-visible,
 .pinned-message-bar__unpin:focus-visible {
-  outline: 2px solid #008069;
+  outline: 2px solid var(--site-brand, #008069);
   outline-offset: -2px;
 }
 

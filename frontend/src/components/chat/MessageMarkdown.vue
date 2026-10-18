@@ -77,7 +77,7 @@ function stopLinkGesture(event: Event) {
 /* biome-ignore lint/correctness/noUnknownPseudoClass: Vue deep selector */
 .message-markdown :deep(blockquote) {
 	padding: 0.15em 0 0.15em 0.75em;
-	border-left: 3px solid rgba(0, 128, 105, 0.42);
+	border-left: 3px solid rgba(var(--site-brand-rgb, 0, 128, 105), 0.42);
 	color: #54656f;
 }
 
@@ -125,7 +125,7 @@ function stopLinkGesture(event: Event) {
 
 /* biome-ignore lint/correctness/noUnknownPseudoClass: Vue deep selector */
 .message-markdown :deep(.message-mention) {
-	color: #168758;
+	color: var(--site-brand, #168758);
 	font-weight: 650;
 }
 
@@ -133,12 +133,12 @@ function stopLinkGesture(event: Event) {
 .message-markdown :deep(.message-mention--self) {
 	padding: 1px 3px;
 	border-radius: 4px;
-	background: rgba(22, 135, 88, 0.14);
+	background: rgba(var(--site-brand-rgb, 22, 135, 88), 0.14);
 }
 
 /* biome-ignore lint/correctness/noUnknownPseudoClass: Vue deep selector */
 .message-markdown :deep(.message-link) {
-	color: #006aa6;
+	color: var(--site-link, #006aa6);
 	text-decoration: none;
 	overflow-wrap: anywhere;
 }

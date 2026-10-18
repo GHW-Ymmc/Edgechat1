@@ -193,8 +193,8 @@ useOverlayLifecycle({
 }
 
 .mobile-navigation-drawer__actions button[aria-current="page"] {
-  background: rgba(0, 128, 105, 0.1);
-  color: #008069;
+  background: rgba(var(--site-brand-rgb, 0, 128, 105), 0.1);
+  color: var(--site-brand, #008069);
 }
 
 .mobile-navigation-drawer__actions .mobile-navigation-drawer__danger {

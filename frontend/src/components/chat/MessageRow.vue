@@ -80,7 +80,7 @@ const time = computed(() => props.msg.createdAt ? formatTime(props.msg.createdAt
 }
 .message-row--own { justify-content: flex-end; }
 .message-bubble--highlighted {
-  outline: 3px solid rgba(0, 128, 105, 0.3);
+  outline: 3px solid rgba(var(--site-brand-rgb, 0, 128, 105), 0.3);
   outline-offset: 3px;
   transition: outline-color 180ms ease;
 }

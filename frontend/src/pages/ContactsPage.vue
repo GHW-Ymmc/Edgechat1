@@ -137,7 +137,7 @@ async function unblockContact(userId: number) {
   color: var(--chat-muted);
 }
 
-.contacts-page__search:focus-within { border-color: var(--chat-accent); box-shadow: 0 0 0 2px rgba(0, 128, 105, 0.14); }
+.contacts-page__search:focus-within { border-color: var(--chat-accent); box-shadow: 0 0 0 2px rgba(var(--site-brand-rgb, 0, 128, 105), 0.14); }
 .contacts-page__search input { width: 100%; min-width: 0; border: 0; outline: 0; background: transparent; color: var(--chat-ink); font: inherit; letter-spacing: 0; }
 
 .contacts-page__body {

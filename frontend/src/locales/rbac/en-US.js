@@ -84,7 +84,7 @@ export default {
   "rbac.permission.site.read": "View site appearance",
   "rbac.scope.site.read": "Public site name and icon",
   "rbac.permission.site.appearance.update": "Update site appearance",
-  "rbac.scope.site.appearance.update": "Name and valid icon only",
+  "rbac.scope.site.appearance.update": "Name, valid icon and preset colors only",
   "rbac.permission.telegram.read": "View Telegram bridge",
   "rbac.scope.telegram.read": "Delegated admins: owned groups only",
   "rbac.permission.telegram.mappings.manage": "Manage mappings",

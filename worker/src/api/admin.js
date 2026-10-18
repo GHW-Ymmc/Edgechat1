@@ -15,6 +15,7 @@ import { errorResponse, parseJsonRequest, randomToken } from '../utils.js';
 import { banExpiryFromMinutes } from '../user-status.js';
 import { hasPermission } from '../../../shared/admin-permissions.ts';
 import { runAuthorizedBatch } from '../rbac/authorization.ts';
+import { isSiteColorTheme } from '../../../shared/site-theme.ts';
 
 export function registerAdminRoutes(app) {
   app.get('/api/admin/overview', async (c) => {
@@ -35,17 +36,22 @@ export function registerAdminRoutes(app) {
 
   app.patch('/api/admin/site-settings', async (c) => {
     const payload = await parseJsonRequest(c.req.raw);
-    const siteName = String(payload.siteName || '').trim();
-    const siteIconUrl = String(payload.siteIconUrl || '').trim();
+    const siteName = payload.siteName === undefined ? undefined : String(payload.siteName || '').trim();
+    const siteIconUrl = payload.siteIconUrl === undefined ? undefined : String(payload.siteIconUrl || '').trim();
+    const colorTheme = payload.colorTheme;
 
-    if (!siteName) {
+    if (siteName === '') {
       return errorResponse('站点名称不能为空');
+    }
+    if (colorTheme !== undefined && !isSiteColorTheme(colorTheme)) {
+      return errorResponse('不支持的站点配色');
     }
 
     try {
       const site = await updateSiteSettings(c.env.DB, {
         siteName,
         siteIconUrl,
+        colorTheme,
         siteOrigin: new URL(c.req.url).origin
       });
       return c.json({ site });

@@ -1,5 +1,6 @@
 <script setup>
-import { onBeforeUnmount, onMounted, ref } from 'vue';
+import { onBeforeUnmount, onMounted, ref, watch } from 'vue';
+import store from '../store.js';
 
 const canvasRef = ref(null);
 let rafId = null;
@@ -28,6 +29,26 @@ const spots = [
   { x: 0.45, y: 0.58, r: 75, dx: 20, dy: 10, speed: 0.026, phase: 3.2 }
 ];
 
+let waveColors;
+let skyColor;
+let horizonColor;
+let depthRgb;
+
+function readPalette() {
+  // Canvas 不会自动继承 CSS 颜色，挂载时读取主题令牌，避免每帧触发计算样式。
+  const style = getComputedStyle(document.documentElement);
+  const color = (name, fallback) => style.getPropertyValue(name).trim() || fallback;
+  waveColors = waves.map((wave, i) => [
+    color(`--auth-wave-${i}`, wave.colors[0]),
+    color(`--auth-wave-${i + 1}`, wave.colors[1])
+  ]);
+  skyColor = color('--auth-wave-sky', '#ffffff');
+  horizonColor = color('--auth-wave-horizon', '#d0e8f4');
+  depthRgb = color('--auth-wave-depth-rgb', '80,150,192');
+}
+
+watch(() => store.site.colorTheme, readPalette, { flush: 'post' });
+
 function getColor(c1, c2, t) {
   const r = parseInt(c1.slice(1,3),16) * (1-t) + parseInt(c2.slice(1,3),16) * t;
   const g = parseInt(c1.slice(3,5),16) * (1-t) + parseInt(c2.slice(3,5),16) * t;
@@ -37,14 +58,14 @@ function getColor(c1, c2, t) {
 
 function drawWaves(ctx, w, h, time) {
   const gradient = ctx.createLinearGradient(0, 0, 0, h);
-  gradient.addColorStop(0, '#ffffff');
-  gradient.addColorStop(0.3, '#d0e8f4');
+  gradient.addColorStop(0, skyColor);
+  gradient.addColorStop(0.3, horizonColor);
   ctx.fillStyle = gradient;
   ctx.fillRect(0, 0, w, h);
 
   const deepGrad = ctx.createLinearGradient(0, h * 0.85, 0, h);
-  deepGrad.addColorStop(0, 'rgba(80,150,192,0)');
-  deepGrad.addColorStop(1, 'rgba(80,150,192,0.35)');
+  deepGrad.addColorStop(0, `rgba(${depthRgb},0)`);
+  deepGrad.addColorStop(1, `rgba(${depthRgb},0.35)`);
   ctx.fillStyle = deepGrad;
   ctx.fillRect(0, h * 0.85, w, h * 0.15);
 
@@ -70,7 +91,7 @@ function drawWaves(ctx, w, h, time) {
     ctx.lineTo(w, h);
     ctx.closePath();
 
-    const fill = getColor(wave.colors[0], wave.colors[1], colorT);
+    const fill = getColor(waveColors[i][0], waveColors[i][1], colorT);
     ctx.fillStyle = fill;
     ctx.fill();
 
@@ -119,6 +140,7 @@ onMounted(() => {
   const canvas = canvasRef.value;
   if (!canvas) return;
   const ctx = canvas.getContext('2d');
+  readPalette();
   canvas.width = window.innerWidth;
   canvas.height = window.innerHeight;
   loop(ctx, canvas);

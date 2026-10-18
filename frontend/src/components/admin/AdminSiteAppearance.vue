@@ -7,14 +7,16 @@ import UiSurface from '../ui/Surface.vue';
 import { t } from '../../i18n.js';
 import { can } from '../../authorization.ts';
 import { resolveServerAssetUrl } from '../../capacitor-platform.ts';
+import AdminSiteTheme from './AdminSiteTheme.vue';
 
 const loading = ref(false);
 const error = ref('');
 const saving = ref(false);
 const iconUploading = ref(false);
+const themeSaving = ref(false);
 const iconFileInputEl = ref(null);
 const siteForm = reactive({ siteName: 'Edgechat', siteIconUrl: '' });
-const busy = computed(() => loading.value || saving.value || iconUploading.value);
+const busy = computed(() => loading.value || saving.value || iconUploading.value || themeSaving.value);
 const iconPreviewUrl = computed(() => siteForm.siteIconUrl.startsWith('/files/')
   ? api.getFileUrl(siteForm.siteIconUrl)
   : resolveServerAssetUrl(siteForm.siteIconUrl));
@@ -27,6 +29,7 @@ async function loadSiteSettings() {
     const payload = await api.adminSiteSettings();
     siteForm.siteName = payload.site?.siteName || 'Edgechat';
     siteForm.siteIconUrl = payload.site?.siteIconUrl || '';
+    store.setSite(payload.site);
   } catch (currentError) {
     error.value = currentError.message;
   } finally {
@@ -117,6 +120,7 @@ onMounted(loadSiteSettings);
         <span>{{ siteForm.siteIconUrl || t('site.noIconUrl') }}</span>
       </div>
     </div>
+    <AdminSiteTheme :disabled="busy" @saving="themeSaving = $event" />
   </UiSurface>
 </template>
 

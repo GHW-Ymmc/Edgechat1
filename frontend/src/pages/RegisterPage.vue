@@ -162,7 +162,7 @@ onMounted(() => {
   align-items: center;
   justify-content: center;
   padding: 24px;
-  background-color: #f5f5f5;
+  background-color: var(--auth-canvas, #f5f5f5);
   position: relative;
   overflow: hidden;
 }
@@ -172,7 +172,7 @@ onMounted(() => {
   position: fixed;
   inset: 0;
   z-index: 0;
-  background: linear-gradient(to bottom, transparent 0%, #e1ecf5 25%, #e6eff6 100%);
+  background: var(--auth-tide, linear-gradient(to bottom, transparent 0%, #e1ecf5 25%, #e6eff6 100%));
   transform: translateY(100%);
   animation: tideRise 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   pointer-events: none;
@@ -183,7 +183,7 @@ onMounted(() => {
   top: max(16px, env(safe-area-inset-top));
   right: max(16px, env(safe-area-inset-right));
   z-index: 2;
-  color: #2c4a6e;
+  color: var(--auth-ink, #2c4a6e);
 }
 
 @keyframes tideRise {
@@ -210,7 +210,7 @@ onMounted(() => {
   font-family: 'Dancing Script', cursive;
   font-size: 56px;
   font-weight: 700;
-  color: #2c4a6e;
+  color: var(--auth-ink, #2c4a6e);
   margin: 0 0 10px;
   letter-spacing: 1px;
   opacity: 0;
@@ -221,7 +221,7 @@ onMounted(() => {
   font-family: 'Great Vibes', cursive;
   font-size: 52px;
   font-weight: 400;
-  color: #5b8dbf;
+  color: var(--auth-brand, #5b8dbf);
   margin: -8px 0 48px;
   letter-spacing: 2px;
   opacity: 0;
@@ -236,7 +236,7 @@ onMounted(() => {
 
 .info-text {
   font-size: 13px;
-  color: #6b8aab;
+  color: var(--auth-muted, #6b8aab);
   margin: -32px 0 28px;
   text-align: center;
 }
@@ -268,7 +268,7 @@ onMounted(() => {
 .custom-cursor {
   position: absolute;
   width: 3px;
-  background-color: #2c4a6e;
+  background-color: var(--auth-ink, #2c4a6e);
   border-radius: 2px;
   opacity: 0;
   pointer-events: none;
@@ -292,15 +292,15 @@ onMounted(() => {
   background: transparent;
   font-size: 18px;
   font-weight: 500;
-  color: #2c4a6e;
+  color: var(--auth-ink, #2c4a6e);
   outline: none;
   caret-color: transparent;
 }
 
 .login-input::placeholder {
-  color: #2c4a6e;
+  color: var(--auth-ink, #2c4a6e);
   text-decoration: underline;
-  text-decoration-color: #5b8dbf;
+  text-decoration-color: var(--auth-brand, #5b8dbf);
   text-decoration-thickness: 3px;
   text-underline-offset: 8px;
 }
@@ -309,9 +309,9 @@ onMounted(() => {
   width: fit-content;
   height: auto;
   border: none;
-  border-bottom: 3px solid #5b8dbf;
+  border-bottom: 3px solid var(--auth-brand, #5b8dbf);
   background: transparent;
-  color: #2c4a6e;
+  color: var(--auth-ink, #2c4a6e);
   font-size: 24px;
   font-weight: 700;
   cursor: pointer;
@@ -329,7 +329,7 @@ onMounted(() => {
 }
 
 .login-btn:hover:not(:disabled) {
-  border-bottom-color: #2c4a6e;
+  border-bottom-color: var(--auth-ink, #2c4a6e);
   transform: scale(1.04);
 }
 

@@ -13,6 +13,7 @@ import './styles-liquid.css';
 import './styles/tokens.css';
 import './styles/layout.css';
 import './styles/ui.css';
+import './styles/color-themes.css';
 import { initLiquidGlass } from './liquid-glass.js';
 import { initializeI18n } from './i18n.js';
 import { parseNotificationRoomTarget, takeNotificationRoomTarget } from './notification-target.js';

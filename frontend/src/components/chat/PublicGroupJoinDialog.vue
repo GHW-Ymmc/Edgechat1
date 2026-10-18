@@ -138,7 +138,7 @@ useOverlayLifecycle({
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  color: #008069;
+  color: var(--site-brand, #008069);
   font-size: 12px;
   font-weight: 600;
 }
@@ -220,8 +220,8 @@ useOverlayLifecycle({
 }
 
 .public-group-dialog__primary {
-  border: 1px solid #008069;
-  background: #008069;
+  border: 1px solid var(--site-brand, #008069);
+  background: var(--site-brand, #008069);
   color: #ffffff;
 }
 
@@ -231,7 +231,7 @@ useOverlayLifecycle({
 }
 
 .public-group-dialog button:focus-visible {
-  outline: 3px solid rgba(0, 128, 105, 0.24);
+  outline: 3px solid rgba(var(--site-brand-rgb, 0, 128, 105), 0.24);
   outline-offset: 2px;
 }
 

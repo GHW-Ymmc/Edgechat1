@@ -35,6 +35,7 @@ const fixedErrorTranslations = new Map([
   ['服务器开小差了', 'Something went wrong on the server'],
   ['当前部署没有绑定 R2，无法统计存储空间', 'R2 storage is not configured for this deployment, so storage usage cannot be calculated'],
   ['站点名称不能为空', 'Site name cannot be empty'],
+  ['不支持的站点配色', 'Unsupported site color palette'],
   ['用户名已存在', 'Username already exists'],
   ['封禁时长必须是正整数分钟', 'Ban duration must be a positive integer number of minutes'],
   ['新密码不能为空', 'New password cannot be empty'],

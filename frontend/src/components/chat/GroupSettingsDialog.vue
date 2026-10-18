@@ -96,7 +96,7 @@ async function openAvatarPicker() {
 .room-dialog__actions { display: flex; justify-content: flex-end; gap: 12px; margin-top: 24px; }
 .room-dialog__secondary, .room-dialog__primary { min-height: 44px; padding: 10px 20px; border-radius: 8px; cursor: pointer; touch-action: manipulation; }
 .room-dialog__secondary { border: 1px solid #e8ecf0; background: #fff; }
-.room-dialog__primary { border: 0; background: #008069; color: #fff; }
+.room-dialog__primary { border: 0; background: var(--site-brand, #008069); color: #fff; }
 .room-dialog__primary:disabled, .room-dialog__secondary:disabled { cursor: not-allowed; opacity: 0.55; }
 .modal-fade-enter-active { transition: opacity 200ms; }
 .modal-fade-leave-active { transition: opacity 150ms; }

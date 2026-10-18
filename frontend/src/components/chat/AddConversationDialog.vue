@@ -228,9 +228,9 @@ watch(
 
 .add-conversation-choice:hover,
 .add-conversation-person:hover:not(:disabled) {
-  border-color: #b7d8d2;
-  background: #f5fbf9;
-  box-shadow: 0 4px 14px rgba(0, 128, 105, 0.08);
+  border-color: var(--site-brand, #b7d8d2);
+  background: var(--site-selected, #f5fbf9);
+  box-shadow: 0 4px 14px rgba(var(--site-brand-rgb, 0, 128, 105), 0.08);
 }
 
 .add-conversation-choice__icon {
@@ -240,8 +240,8 @@ watch(
   width: 44px;
   height: 44px;
   border-radius: 50%;
-  background: #e7f4f1;
-  color: #008069;
+  background: var(--site-selected, #e7f4f1);
+  color: var(--site-brand, #008069);
 }
 
 .add-conversation-choice span:nth-child(2) {
@@ -275,7 +275,7 @@ watch(
   border: 0;
   border-radius: 8px;
   background: transparent;
-  color: #008069;
+  color: var(--site-brand, #008069);
   cursor: pointer;
 }
 
@@ -318,7 +318,7 @@ watch(
 }
 
 .add-conversation-person__status {
-  color: #008069;
+  color: var(--site-brand, #008069);
   font-size: 12px;
   font-weight: 600;
 }
@@ -342,7 +342,7 @@ watch(
 }
 
 .add-conversation-dialog button:focus-visible {
-  outline: 3px solid rgba(0, 128, 105, 0.24);
+  outline: 3px solid rgba(var(--site-brand-rgb, 0, 128, 105), 0.24);
   outline-offset: 2px;
 }
 

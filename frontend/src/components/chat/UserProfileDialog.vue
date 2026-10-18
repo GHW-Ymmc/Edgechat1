@@ -105,7 +105,7 @@ useOverlayLifecycle({
 .user-profile-dialog__error { color: #b42318; }
 .user-profile-dialog__actions { display: flex; justify-content: stretch; margin-top: 24px; }
 .user-profile-dialog__actions > * { flex: 1; min-height: 44px; }
-.user-profile-dialog button:focus-visible { outline: 2px solid #008069; outline-offset: 3px; }
+.user-profile-dialog button:focus-visible { outline: 2px solid var(--site-brand, #008069); outline-offset: 3px; }
 @media (max-width: 640px) {
   .user-profile-overlay { align-items: flex-end; padding: 0; }
   .user-profile-dialog { width: 100%; max-height: calc(100dvh - env(safe-area-inset-top) - 16px); border-radius: 20px 20px 0 0; padding: 20px 24px calc(24px + env(safe-area-inset-bottom)); }

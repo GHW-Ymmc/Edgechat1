@@ -376,7 +376,7 @@ export function createDemoFixtures(locale = getLocale()) {
   };
 
   return {
-    site: { siteName: 'EdgeChat Demo', siteIconUrl: '/logo.svg' },
+    site: { siteName: 'EdgeChat Demo', siteIconUrl: '/logo.svg', colorTheme: 'default' },
     session: {
       token: 'edgechat-demo-session',
       userId: 1,

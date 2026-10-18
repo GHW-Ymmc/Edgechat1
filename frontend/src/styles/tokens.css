@@ -104,8 +104,8 @@
 .field input:focus,
 .field textarea:focus,
 .field select:focus {
-  border-color: rgba(45, 156, 151, 0.42);
-  box-shadow: 0 0 0 3px rgba(45, 156, 151, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  border-color: rgba(var(--site-brand-rgb, 45, 156, 151), 0.42);
+  box-shadow: 0 0 0 3px rgba(var(--site-brand-rgb, 45, 156, 151), 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.4);
 }
 
 .field textarea {
@@ -121,7 +121,7 @@
   border: none;
   padding: 12px 18px;
   border-radius: var(--radius-control);
-  background: linear-gradient(180deg, rgba(90, 143, 203, 0.92), rgba(69, 121, 186, 0.88)), var(--warm);
+  background: var(--site-button-background, linear-gradient(180deg, rgba(90, 143, 203, 0.92), rgba(69, 121, 186, 0.88)), var(--warm));
   color: #fffaf2;
   font-weight: 600;
   cursor: pointer;
@@ -133,12 +133,12 @@
     transform 280ms cubic-bezier(0.37, 0, 0.63, 1),
     box-shadow 280ms cubic-bezier(0.37, 0, 0.63, 1),
     opacity 220ms ease;
-  box-shadow: 0 4px 16px rgba(90, 143, 203, 0.22);
+  box-shadow: 0 4px 16px rgba(var(--site-brand-rgb, 90, 143, 203), 0.22);
 }
 
 .button:hover:not(:disabled) {
   transform: translateY(-1px);
-  box-shadow: 0 8px 24px rgba(90, 143, 203, 0.3);
+  box-shadow: 0 8px 24px rgba(var(--site-brand-rgb, 90, 143, 203), 0.3);
 }
 
 .button.secondary {

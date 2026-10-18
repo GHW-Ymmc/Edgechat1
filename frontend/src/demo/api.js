@@ -16,6 +16,7 @@ import {
 import { demoMaintenanceReport } from './maintenance.ts';
 import { demoInstanceBridge } from './instance-bridge.js';
 import { isGroupChannelKind } from '../../../shared/group-channel.ts';
+import { isSiteColorTheme } from '../../../shared/site-theme.ts';
 import { parseLocalUserId, validateBio } from '../../../shared/user-profile.ts';
 import { authorizeDemoAdmin, demoAuthorization, demoOwnsGroup, demoRbac } from './rbac.ts';
 
@@ -581,9 +582,13 @@ async function handleDemoRequest(path, options = {}) {
     return { site: cloneDemo(demoState.site) };
   }
   if (method === 'PATCH' && pathname === '/admin/site-settings') {
+    if (body.colorTheme !== undefined && !isSiteColorTheme(body.colorTheme)) fail('不支持的站点配色', 400);
+    if (body.siteName !== undefined && !String(body.siteName || '').trim()) fail('站点名称不能为空', 400);
     demoState.site = {
-      siteName: String(body.siteName || 'EdgeChat Demo').trim(),
-      siteIconUrl: String(body.siteIconUrl || '').trim()
+      ...demoState.site,
+      ...(body.siteName === undefined ? {} : { siteName: String(body.siteName).trim() }),
+      ...(body.siteIconUrl === undefined ? {} : { siteIconUrl: String(body.siteIconUrl || '').trim() }),
+      ...(body.colorTheme === undefined ? {} : { colorTheme: body.colorTheme })
     };
     return { site: cloneDemo(demoState.site) };
   }

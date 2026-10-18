@@ -71,7 +71,7 @@
   padding: 0;
   border: 0;
   border-radius: 50%;
-  background: #008069;
+  background: var(--site-brand, #008069);
   color: #fff;
   cursor: pointer;
 }
@@ -108,7 +108,7 @@
 }
 
 .voice-waveform__bar--played {
-  background: #008069;
+  background: var(--site-brand, #008069);
 }
 
 .voice-waveform__seek {
@@ -144,8 +144,8 @@
 
 .voice-message__speed:hover,
 .voice-message__speed:focus-visible {
-  background: rgba(0, 128, 105, 0.1);
-  color: #008069;
+  background: rgba(var(--site-brand-rgb, 0, 128, 105), 0.1);
+  color: var(--site-brand, #008069);
 }
 
 .pending-attachment {
@@ -175,7 +175,7 @@
   flex: 0 0 auto;
   align-items: center;
   gap: 5px;
-  color: #008069;
+  color: var(--site-brand, #008069);
   font-size: 13px;
   font-variant-numeric: tabular-nums;
 }

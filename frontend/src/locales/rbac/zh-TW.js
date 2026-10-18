@@ -84,7 +84,7 @@ export default {
   "rbac.permission.site.read": "查看網站外觀",
   "rbac.scope.site.read": "公開名稱與圖示",
   "rbac.permission.site.appearance.update": "修改網站外觀",
-  "rbac.scope.site.appearance.update": "僅名稱與合法圖示",
+  "rbac.scope.site.appearance.update": "僅名稱、合法圖示與預設配色",
   "rbac.permission.telegram.read": "查看橋接狀態",
   "rbac.scope.telegram.read": "子管理員僅自己的群",
   "rbac.permission.telegram.mappings.manage": "管理映射",

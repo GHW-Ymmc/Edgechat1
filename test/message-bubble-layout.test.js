@@ -107,6 +107,6 @@ test("回复气泡显示引用预览并复用消息定位能力", () => {
 	assert.match(messageRow, /@reveal="emit\('reveal', msg\.replyToMessageId\)"/);
 	assert.match(chatPage, /@reveal="revealMessage"/);
 	assert.match(chatPage, /:replying-to="replyingTo"/);
-	assert.match(replyPreview, /border-left:\s*3px solid #008069;/);
+	assert.match(replyPreview, /border-left:\s*3px solid var\(--site-brand, #008069\);/);
 	assert.match(replyPreview, /messages\.replyDeleted/);
 });

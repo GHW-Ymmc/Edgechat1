@@ -150,7 +150,7 @@ onBeforeUnmount(() => {
 }
 
 .message-context-menu button:focus-visible {
-  outline: 2px solid #008069;
+  outline: 2px solid var(--site-brand, #008069);
   outline-offset: -2px;
 }
 
