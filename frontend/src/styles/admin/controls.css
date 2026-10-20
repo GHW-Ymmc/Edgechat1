@@ -128,10 +128,10 @@
   justify-content: center;
   gap: var(--admin-space-2xs);
   padding-inline: var(--admin-space-sm);
-  border: 1px solid var(--admin-ink);
+  border: 1px solid var(--site-action-border, var(--admin-ink));
   border-radius: var(--admin-radius-control);
-  background: var(--admin-ink);
-  color: var(--admin-panel);
+  background: var(--site-action-bg, var(--admin-ink));
+  color: var(--site-on-action, var(--admin-panel));
   font-size: 0.8125rem;
   font-weight: 600;
   white-space: nowrap;
@@ -140,8 +140,8 @@
 
 .admin-page .ui-button:hover:not(:disabled),
 .admin-page .ui-button:active:not(:disabled) {
-  border-color: var(--admin-ink-hover);
-  background: var(--admin-ink-hover);
+  border-color: var(--site-action-border, var(--admin-ink-hover));
+  background: var(--site-action-hover, var(--admin-ink-hover));
 }
 
 .admin-page .ui-button:focus-visible {

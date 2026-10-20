@@ -51,7 +51,7 @@ jobs:
         run: npm run build
       - name: Validate message retention
         env:
-          MESSAGE_RETENTION_DAYS: ${{ vars.MESSAGE_RETENTION_DAYS || '7' }}
+          MESSAGE_RETENTION_DAYS: ${{ vars.MESSAGE_RETENTION_DAYS || '15' }}
         shell: bash
         run: |
           if [[ ! "$MESSAGE_RETENTION_DAYS" =~ ^[1-9][0-9]*$ ]]; then
@@ -70,7 +70,7 @@ jobs:
         env:
           R2_AVAILABLE: ${{ steps.ensure_resources.outputs.r2_available }}
           R2_BUCKET_NAME: ${{ steps.ensure_resources.outputs.r2_bucket_name }}
-          MESSAGE_RETENTION_DAYS: ${{ vars.MESSAGE_RETENTION_DAYS || '7' }}
+          MESSAGE_RETENTION_DAYS: ${{ vars.MESSAGE_RETENTION_DAYS || '15' }}
         run: |
           cp wrangler.example.toml wrangler.ci.toml
           sed -i "s|^MESSAGE_RETENTION_DAYS = .*|MESSAGE_RETENTION_DAYS = \"${MESSAGE_RETENTION_DAYS}\"|" wrangler.ci.toml

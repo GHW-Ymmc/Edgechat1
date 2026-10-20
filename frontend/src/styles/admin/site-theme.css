@@ -19,9 +19,9 @@
 .site-theme__swatches i:nth-child(2) { background: #edf4fc; }
 .site-theme__swatches i:last-child { background: #176bc0; border-radius: 0 5px 5px 0; }
 /* 色卡只表示候选配色，不随当前主题变化，否则无法比较与恢复默认主题。 */
-[data-palette="cream-sakura"] .site-theme__swatches i { background: #fff8ef; }
-[data-palette="cream-sakura"] .site-theme__swatches i:nth-child(2) { background: #f7e2e8; }
-[data-palette="cream-sakura"] .site-theme__swatches i:last-child { background: #9b4567; }
+[data-palette="cream-sakura"] .site-theme__swatches i { background: #fff5fa; }
+[data-palette="cream-sakura"] .site-theme__swatches i:nth-child(2) { background: #f8d8e9; }
+[data-palette="cream-sakura"] .site-theme__swatches i:last-child { background: #dfedfc; }
 .site-theme__label { font-size: 14px; font-weight: 600; }
 .site-theme__state { margin-left: auto; color: var(--admin-muted); font-size: 12px; }
 .site-theme__feedback { margin: 12px 0 0; }

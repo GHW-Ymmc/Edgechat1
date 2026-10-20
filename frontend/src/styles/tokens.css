@@ -122,7 +122,7 @@
   padding: 12px 18px;
   border-radius: var(--radius-control);
   background: var(--site-button-background, linear-gradient(180deg, rgba(90, 143, 203, 0.92), rgba(69, 121, 186, 0.88)), var(--warm));
-  color: #fffaf2;
+  color: var(--site-on-action, #fffaf2);
   font-weight: 600;
   cursor: pointer;
   display: inline-flex;
@@ -150,6 +150,7 @@
 
 .button.danger {
   background: linear-gradient(180deg, rgba(189, 87, 74, 0.9), rgba(161, 60, 50, 0.86)), var(--danger);
+  color: #fffaf2;
   box-shadow: 0 4px 16px rgba(173, 75, 64, 0.18);
 }
 

@@ -220,9 +220,9 @@ useOverlayLifecycle({
 }
 
 .public-group-dialog__primary {
-  border: 1px solid var(--site-brand, #008069);
-  background: var(--site-brand, #008069);
-  color: #ffffff;
+  border: 1px solid var(--site-action-border, #008069);
+  background: var(--site-action-bg, #008069);
+  color: var(--site-on-action, #ffffff);
 }
 
 .public-group-dialog button:disabled {

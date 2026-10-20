@@ -134,7 +134,7 @@ useOverlayLifecycle({
 .room-dialog__error { margin: 16px 0 0; color: #b42318; font-size: 13px; overflow-wrap: anywhere; }
 .room-dialog__secondary, .room-dialog__primary { min-height: 44px; padding: 10px 20px; border-radius: 8px; cursor: pointer; touch-action: manipulation; }
 .room-dialog__secondary { border: 1px solid #e8ecf0; background: #fff; }
-.room-dialog__primary { border: 0; background: var(--site-brand, #008069); color: #fff; }
+.room-dialog__primary { border: 0; background: var(--site-action-bg, #008069); color: var(--site-on-action, #fff); }
 .room-dialog__primary:disabled { cursor: not-allowed; opacity: 0.55; }
 .room-dialog button:focus-visible { outline: 3px solid rgba(var(--site-brand-rgb, 0, 128, 105), 0.24); outline-offset: 2px; }
 .modal-fade-enter-active { transition: opacity 200ms; }

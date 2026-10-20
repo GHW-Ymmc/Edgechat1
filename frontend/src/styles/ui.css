@@ -69,8 +69,8 @@
   border-radius: 10px;
   min-height: 38px;
   padding: 0 16px;
-  background: var(--site-brand, #3b82f6);
-  color: #fff;
+  background: var(--site-action-bg, #3b82f6);
+  color: var(--site-on-action, #fff);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -81,7 +81,7 @@
 }
 
 .ui-button:hover:not(:disabled) {
-  background: var(--site-brand-hover, #2563eb);
+  background: var(--site-action-hover, #2563eb);
 }
 
 .ui-button:disabled {

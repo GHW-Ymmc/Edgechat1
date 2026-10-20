@@ -9,7 +9,7 @@ command = "npm run schema:generate"
 
 [vars]
 ADMIN_USERNAMES = "admin"
-MESSAGE_RETENTION_DAYS = "7"
+MESSAGE_RETENTION_DAYS = "15"
 SOFT_DELETE_RETENTION_DAYS = "60"
 GC_BATCH_SIZE = "90"
 GC_MAX_BATCHES_PER_RUN = "20"

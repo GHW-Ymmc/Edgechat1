@@ -71,8 +71,8 @@
   padding: 0;
   border: 0;
   border-radius: 50%;
-  background: var(--site-brand, #008069);
-  color: #fff;
+  background: var(--site-action-bg, #008069);
+  color: var(--site-on-action, #fff);
   cursor: pointer;
 }
 

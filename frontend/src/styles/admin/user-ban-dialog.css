@@ -166,12 +166,12 @@
 
 .admin-ban-dialog__option--selected {
   border-color: var(--admin-ink);
-  background: var(--admin-ink);
-  color: var(--admin-panel);
+  background: var(--site-action-bg, var(--admin-ink));
+  color: var(--site-on-action, var(--admin-panel));
 }
 
 .admin-ban-dialog__option--selected:hover:not(:disabled) {
-  background: var(--admin-ink-hover);
+  background: var(--site-action-hover, var(--admin-ink-hover));
 }
 
 .admin-ban-dialog__custom {

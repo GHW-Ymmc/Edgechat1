@@ -88,7 +88,7 @@ export function registerV1Routes(app) {
       site,
       limits: {
         maxUploadBytes: Number(c.env.MAX_FILE_SIZE || 20971520),
-        messageRetentionDays: Number(c.env.MESSAGE_RETENTION_DAYS || 7)
+        messageRetentionDays: Number(c.env.MESSAGE_RETENTION_DAYS || 15)
       },
       features: {
         deviceSessions: true,

@@ -176,6 +176,8 @@ GitHub Actions はサーバーサイド暗号化の Worker Secrets を管理し�
 
 ### GitHub Actions による自動デプロイ
 
+メッセージの既定保持期間は **15 日間**です。期限を過ぎると毎日の定期処理で順次自動削除されます。`MESSAGE_RETENTION_DAYS` で変更でき、明示的な既存設定はアップグレード後も維持されます。削除済みメッセージは復元できません。
+
 デプロイとその後の更新には、リポジトリに組み込まれた GitHub Actions ワークフローの利用を推奨します。`Sync Upstream` は毎日 2 回確認し、コミット末尾の `EdgeChat-Update: stable` / `security` が付いた上流リリースをマージして明示的にデプロイを起動します。初回設定とトークン権限は[更新ガイド](https://echat.azora.top/en/guide/updating-fork)、`MESSAGE_RETENTION_DAYS` は[デプロイガイド](https://echat.azora.top/en/guide/actions-deploy)を参照してください。
 
 ドキュメントに従って Cloudflare の認証とリポジトリ設定を完了すると、`Deploy Worker` を手動実行できます。また、`master` または `main` ブランチにコードをプッシュしてデプロイをトリガーすることもできます。ワークフローファイルは `.github/workflows/deploy-worker.yml` です。

@@ -4,6 +4,8 @@
 
 在 **后台 → 站点外观 → 网站配色** 点击 **奶油樱花粉** 即可保存并应用，点击 **经典配色** 可以恢复。此操作只提交配色，不会保存旁边尚未确认的名称或图标。
 
+`2.17.1` 起采用浅樱花粉与雾蓝交融的梦幻配色；主按钮使用浅色渐变与深色文字，不再使用深玫瑰色大色块。
+
 - 超级管理员或拥有「修改站点外观」权限的管理员可以切换；只读管理员只能查看。
 - 配色作用于整个站点的登录、注册、聊天、个人设置及后台。当前窗口立即生效，其他访客刷新后生效，不强制刷新正在聊天的页面。
 - 个人自定义背景保留；错误、警告、成功与在线提示继续使用原有语义色。当前网页只有浅色设计，此功能不是深色模式。
@@ -14,6 +16,8 @@
 ## English
 
 Open **Admin → Site appearance → Site color palette** and click **Cream Sakura** to save and apply it immediately. Click **Classic palette** to restore the original colors. This action does not save unsaved name or icon edits.
+
+Since `2.17.1`, Cream Sakura blends pale pink with mist blue. Primary buttons use pastel gradients with dark, readable labels instead of solid dark-rose fills.
 
 - Super administrators and administrators with the site-appearance update permission can switch palettes; read-only administrators can view them.
 - The palette covers login, registration, chat, personal settings and administration. It applies immediately in the current window; other visitors see it after refreshing. Active chats are not forcibly reloaded.

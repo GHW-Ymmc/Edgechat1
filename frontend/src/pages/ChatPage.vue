@@ -987,7 +987,7 @@ watch(
   height: var(--chat-viewport-height, 100dvh);
   min-height: 100dvh;
   overflow: hidden;
-  background: var(--chat-canvas);
+  background: var(--site-background, var(--chat-canvas));
   color: var(--chat-ink);
   font-family: var(--chat-font);
   letter-spacing: normal;
@@ -1262,7 +1262,7 @@ watch(
   min-width: 0;
   min-height: 0;
   overflow: hidden;
-  background: var(--chat-canvas);
+  background: var(--site-background, var(--chat-canvas));
 }
 
 .chat-header {

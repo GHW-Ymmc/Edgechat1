@@ -727,7 +727,7 @@ async function changePassword() {
   border: none;
   border-radius: 12px;
   background: var(--site-button-background, linear-gradient(135deg, rgba(91, 141, 191, 0.85), rgba(69, 121, 186, 0.8)));
-  color: #fff;
+  color: var(--site-on-action, #fff);
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
@@ -914,7 +914,7 @@ async function changePassword() {
   border: none;
   border-radius: 14px;
   background: var(--site-button-background, linear-gradient(135deg, rgba(91, 141, 191, 0.85), rgba(69, 121, 186, 0.8)));
-  color: #fff;
+  color: var(--site-on-action, #fff);
   font-size: 16px;
   font-weight: 600;
   cursor: pointer;
