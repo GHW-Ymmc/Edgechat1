@@ -185,6 +185,7 @@ export default {
   'chat.groupSettings': '群设置',
   'chat.loadEarlier': '加载更早',
   'chat.loadingMessages': '加载中...',
+  'chat.refreshFailed': '刷新失败，正在显示已保存的消息。',
   'chat.noMessages': '暂无消息',
 	  'chat.addAttachment': '添加附件',
 	  'chat.fileSelectionFailed': '无法读取所选文件，请重新选择。',

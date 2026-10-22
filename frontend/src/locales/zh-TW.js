@@ -279,6 +279,7 @@ export default {
   "chat.groupSettings": "群設置",
   "chat.loadEarlier": "加載更早",
   "chat.loadingMessages": "加載中...",
+  "chat.refreshFailed": "刷新失敗，正在顯示已儲存的訊息。",
   "chat.noMessages": "暫無消息",
   "chat.addAttachment": "添加附件",
   "chat.fileSelectionFailed": "無法讀取所選文件，請重新選擇。",

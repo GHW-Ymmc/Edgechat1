@@ -1,11 +1,12 @@
-import { nextTick, ref, watch } from "vue";
+import { getCurrentScope, nextTick, onScopeDispose, ref, watch } from "vue";
 import api from "../api.js";
-import { dispatchAuthInvalid } from "../auth-storage.js";
+import { addAuthInvalidListener, dispatchAuthInvalid } from "../auth-storage.js";
 import { createRealtimeSession } from "../realtime-session.js";
 import { connectRoomSocket } from "../ws.js";
 import { t } from "../i18n.js";
 import { localizeErrorMessage } from "../localized-error.js";
 import { useAttachmentQueue } from "./useAttachmentQueue.js";
+import { createRoomSnapshotCache } from "../room-snapshot-cache.js";
 
 const WS_CLOSE_UNAUTHORIZED = 4401;
 const WS_CLOSE_FORBIDDEN = 4403;
@@ -26,6 +27,8 @@ export function useChatRoom({
 	const pinnedMessage = ref(null);
 	const highlightedMessageId = ref(null);
 	const loading = ref(false);
+	const refreshing = ref(false);
+	const refreshFailed = ref(false);
 	const wsStatus = ref("closed");
 	const composerText = ref("");
 	const {
@@ -36,6 +39,51 @@ export function useChatRoom({
 	const messagesEl = ref(null);
 	let messageLoadGeneration = 0;
 	let highlightTimer = null;
+	const snapshots = createRoomSnapshotCache();
+	const historyReads = new Set();
+	let displayedRoomKey = "";
+	let snapshotReady = false;
+	let sessionGeneration = 0;
+	let disposed = false;
+
+	function invalidateReads() {
+		messageLoadGeneration += 1;
+		historyReads.clear();
+		loading.value = false;
+		refreshing.value = false;
+		refreshFailed.value = false;
+	}
+
+	function clearRoomState() {
+		invalidateReads();
+		messages.value = [];
+		pinnedMessage.value = null;
+		snapshotReady = false;
+		displayedRoomKey = "";
+		clearMessageHighlight();
+	}
+
+	function clearSessionState() {
+		sessionGeneration += 1;
+		snapshots.clear();
+		clearRoomState();
+		clearAttachments();
+		composerText.value = "";
+		disconnectSocket();
+	}
+
+	const stopSessionWatch = watch(
+		[() => session.value?.userId, () => session.value?.token],
+		clearSessionState,
+		{ flush: "sync" },
+	);
+	const removeAuthInvalidListener = addAuthInvalidListener(clearSessionState);
+
+	function saveSnapshot() {
+		if (displayedRoomKey && snapshotReady) {
+			snapshots.set(displayedRoomKey, { messages: messages.value, pinnedMessage: pinnedMessage.value });
+		}
+	}
 
 	function roomKey(room = activeRoom.value) {
 		return room?.kind && room?.id ? `${room.kind}:${room.id}` : "";
@@ -109,28 +157,73 @@ export function useChatRoom({
 		}
 	}
 
-	function handleRoomAccessRevoked() {
-		const room = activeRoom.value;
-		if (!room) {
-			return;
+	function handleRoomAccessRevoked(key = roomKey()) {
+		snapshots.delete(key);
+		if (displayedRoomKey === key) {
+			clearRoomState();
+			disconnectSocket();
 		}
-
-		disconnectSocket();
-		messages.value = [];
-		pinnedMessage.value = null;
-		clearMessageHighlight();
-		onRoomAccessRevoked(room);
+		if (roomKey() === key && activeRoom.value) {
+			onRoomAccessRevoked(activeRoom.value);
+		}
 	}
 
 	function handleSocketClose(event) {
 		const code = Number(event?.code || 0);
 		const reason = String(event?.reason || "");
 		if (code === WS_CLOSE_UNAUTHORIZED || reason === WS_REASON_UNAUTHORIZED) {
+			clearSessionState();
 			dispatchAuthInvalid(t('chat.sessionInvalid'));
 			return;
 		}
 		if (code === WS_CLOSE_FORBIDDEN || reason === WS_REASON_FORBIDDEN) {
-			handleRoomAccessRevoked();
+			handleRoomAccessRevoked(event.key);
+		}
+		if (code === 1008 && reason === "Unauthorized") {
+			// ChannelRoom's legacy close does not distinguish a lost login from lost membership.
+			snapshots.clear();
+			handleRoomAccessRevoked(event.key);
+		}
+	}
+
+	function applyMessageEvent(payload) {
+		if (payload.type === "message" && payload.message) {
+			messages.value = mergeMessages(messages.value, [payload.message]);
+		}
+		if (payload.type === "message_deleted") {
+			const messageId = Number(payload.messageId);
+			messages.value = messages.value
+				.filter((message) => Number(message.id) !== messageId)
+				.map((message) => Number(message.replyToMessageId) === messageId
+					? { ...message, replyTo: { id: messageId, deleted: true } }
+					: message);
+			if (Number(pinnedMessage.value?.id) === messageId) pinnedMessage.value = null;
+		}
+		if (payload.type === "message_pinned" && payload.message) {
+			pinnedMessage.value = payload.message;
+		}
+		if (payload.type === "message_unpinned" &&
+			Number(pinnedMessage.value?.id) === Number(payload.messageId)) {
+			pinnedMessage.value = null;
+		}
+	}
+
+	function applyHistory(payload, read, append) {
+		// Replace cached history so edits/deletions made while away cannot survive a refresh.
+		messages.value = append ? mergeMessages(payload.messages, messages.value) : payload.messages;
+		pinnedMessage.value = payload.pinnedMessage || null;
+		// HTTP may have captured its snapshot before these socket events arrived.
+		for (const event of read.events) applyMessageEvent(event);
+		snapshotReady = true;
+	}
+
+	function handleHistoryError(currentError, key, loginGeneration) {
+		if (loginGeneration !== sessionGeneration) return;
+		if (currentError.status === 401) {
+			clearSessionState();
+			dispatchAuthInvalid(currentError.message);
+		} else if (currentError.status === 403 || currentError.status === 404) {
+			handleRoomAccessRevoked(key);
 		}
 	}
 
@@ -150,35 +243,13 @@ export function useChatRoom({
 			if (connection?.key !== roomKey()) {
 				return;
 			}
+			if (["message", "message_deleted", "message_pinned", "message_unpinned"].includes(payload.type)) {
+				for (const read of historyReads) read.events.push(payload);
+				applyMessageEvent(payload);
+			}
 			if (payload.type === "message" && payload.message) {
-				if (messages.value.some((item) => item.id === payload.message.id)) {
-					return;
-				}
-				messages.value = [...messages.value, payload.message];
 				applyActiveRoomActivity(payload.message);
 				nextTick().then(scrollToBottom);
-			}
-			if (payload.type === "message_deleted") {
-				const messageId = Number(payload.messageId);
-				messages.value = messages.value
-					.filter((message) => Number(message.id) !== messageId)
-					.map((message) =>
-						Number(message.replyToMessageId) === messageId
-							? { ...message, replyTo: { id: messageId, deleted: true } }
-							: message,
-					);
-				if (Number(pinnedMessage.value?.id) === messageId) {
-					pinnedMessage.value = null;
-				}
-			}
-			if (payload.type === "message_pinned" && payload.message) {
-				pinnedMessage.value = payload.message;
-			}
-			if (
-				payload.type === "message_unpinned" &&
-				Number(pinnedMessage.value?.id) === Number(payload.messageId)
-			) {
-				pinnedMessage.value = null;
 			}
 			if (payload.type === "error") {
 				error.value = localizeErrorMessage(payload.error);
@@ -189,67 +260,76 @@ export function useChatRoom({
 	async function loadMessages(before = null, append = false) {
 		const room = activeRoom.value;
 		const key = roomKey(room);
-		if (!key) {
-			return false;
-		}
+		if (!key || disposed || !session.value?.userId) return false;
 
 		const generation = ++messageLoadGeneration;
+		const loginGeneration = sessionGeneration;
+		const read = { events: [] };
+		historyReads.add(read);
 		loading.value = true;
+		refreshing.value = !append && snapshotReady;
+		refreshFailed.value = false;
 		error.value = "";
 		try {
 			const payload = await roomApi.getMessages(room.kind, room.id, before);
-			if (generation !== messageLoadGeneration || roomKey() !== key) {
-				return false;
-			}
-			messages.value = append
-				? mergeMessages(payload.messages, messages.value)
-				: payload.messages;
-			pinnedMessage.value = payload.pinnedMessage || null;
+			if (generation !== messageLoadGeneration || roomKey() !== key) return false;
+			applyHistory(payload, read, append);
 			await nextTick();
-			if (!append) {
-				scrollToBottom();
-			}
+			if (generation !== messageLoadGeneration || roomKey() !== key) return false;
+			if (!append) scrollToBottom();
 			return true;
 		} catch (currentError) {
 			if (generation === messageLoadGeneration && roomKey() === key) {
 				error.value = currentError.message;
+				refreshFailed.value = !append && snapshotReady;
 			}
+			handleHistoryError(currentError, key, loginGeneration);
 			return false;
 		} finally {
+			historyReads.delete(read);
 			if (generation === messageLoadGeneration) {
 				loading.value = false;
+				refreshing.value = false;
 			}
 		}
 	}
 
 	async function activateRoom() {
-		messageLoadGeneration += 1;
-		messages.value = [];
-		pinnedMessage.value = null;
-		clearMessageHighlight();
-		loading.value = false;
+		if (disposed || !session.value?.userId) return false;
+		saveSnapshot();
+		clearRoomState();
+		displayedRoomKey = roomKey();
+		const snapshot = snapshots.get(displayedRoomKey);
+		if (snapshot) {
+			messages.value = snapshot.messages;
+			pinnedMessage.value = snapshot.pinnedMessage;
+			snapshotReady = true;
+		}
+		// History and WS start independently, including on a cache hit.
+		const pending = loadMessages();
+		const generation = messageLoadGeneration;
+		if (snapshot) void nextTick().then(() => {
+			if (generation === messageLoadGeneration) scrollToBottom();
+		});
 		connectSocket();
-		return loadMessages();
+		return pending;
 	}
 
 	function deactivateRoom() {
-		messageLoadGeneration += 1;
-		messages.value = [];
-		pinnedMessage.value = null;
-		clearMessageHighlight();
-		loading.value = false;
+		// No active room also covers room deletion; never retain that room's snapshot.
+		snapshots.delete(displayedRoomKey);
+		clearRoomState();
 		disconnectSocket();
 	}
 
 	function pauseRoom() {
-		// 离开聊天内容时只终止在途读取与实时连接，草稿和现有消息留给返回后的恢复流程。
-		messageLoadGeneration += 1;
-		loading.value = false;
+		saveSnapshot();
+		invalidateReads();
 		disconnectSocket();
 	}
 
 	function connectSocket() {
-		if (!activeRoom.value) {
+		if (!activeRoom.value || disposed || !session.value?.userId) {
 			return;
 		}
 		const key = roomKey();
@@ -388,27 +468,35 @@ export function useChatRoom({
 	async function revealMessage(messageId) {
 		const targetId = Number(messageId);
 		const key = roomKey();
-		if (!targetId || !key) {
+		const generation = messageLoadGeneration;
+		const loginGeneration = sessionGeneration;
+		if (!targetId || !key || disposed || !session.value?.userId) {
 			return false;
 		}
 		await nextTick();
+		if (generation !== messageLoadGeneration || roomKey() !== key) return false;
 		if (highlightMessage(targetId)) {
 			return true;
 		}
 
+		const read = { events: [] };
+		historyReads.add(read);
 		try {
 			const room = activeRoom.value;
 			const payload = await roomApi.getMessages(room.kind, room.id, targetId + 1);
-			if (roomKey() !== key) {
+			if (generation !== messageLoadGeneration || roomKey() !== key) {
 				return false;
 			}
-			pinnedMessage.value = payload.pinnedMessage || pinnedMessage.value;
-			messages.value = mergeMessages(payload.messages, messages.value);
+			applyHistory(payload, read, true);
 			await nextTick();
+			if (generation !== messageLoadGeneration || roomKey() !== key) return false;
 			return highlightMessage(targetId);
 		} catch (currentError) {
-			error.value = currentError.message;
+			if (generation === messageLoadGeneration && roomKey() === key) error.value = currentError.message;
+			handleHistoryError(currentError, key, loginGeneration);
 			return false;
+		} finally {
+			historyReads.delete(read);
 		}
 	}
 
@@ -416,7 +504,7 @@ export function useChatRoom({
 		return revealMessage(pinnedMessage.value?.id);
 	}
 
-	watch(() => roomKey(), clearAttachments, { flush: "sync" });
+	const stopAttachmentWatch = watch(() => roomKey(), clearAttachments, { flush: "sync" });
 
 	async function loadOlder() {
 		if (loading.value) {
@@ -428,7 +516,7 @@ export function useChatRoom({
 		}
 	}
 
-	watch(
+	const stopMessagesWatch = watch(
 		messages,
 		(current, previous) => {
 			const receivedNewLastMessage =
@@ -441,11 +529,23 @@ export function useChatRoom({
 		{ flush: "post" },
 	);
 
+	function dispose() {
+		disposed = true;
+		stopSessionWatch();
+		stopAttachmentWatch();
+		stopMessagesWatch();
+		removeAuthInvalidListener();
+		clearSessionState();
+	}
+	if (getCurrentScope()) onScopeDispose(dispose);
+
 	return {
 		messages,
 		pinnedMessage,
 		highlightedMessageId,
 		loading,
+		refreshing,
+		refreshFailed,
 		wsStatus,
 		composerText,
 		pendingAttachments,

@@ -206,6 +206,7 @@ export default {
   'chat.groupSettings': 'Group settings',
   'chat.loadEarlier': 'Load earlier',
   'chat.loadingMessages': 'Loading...',
+  'chat.refreshFailed': 'Refresh failed. Showing previously loaded messages.',
   'chat.noMessages': 'No messages',
 	  'chat.addAttachment': 'Add attachment',
 	  'chat.fileSelectionFailed': 'The selected file could not be read. Please choose it again.',
