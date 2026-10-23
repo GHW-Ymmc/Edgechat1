@@ -1,4 +1,4 @@
-import { getCurrentScope, nextTick, onScopeDispose, ref, watch } from "vue";
+import { computed, getCurrentScope, nextTick, onScopeDispose, ref, watch } from "vue";
 import api from "../api.js";
 import { addAuthInvalidListener, dispatchAuthInvalid } from "../auth-storage.js";
 import { createRealtimeSession } from "../realtime-session.js";
@@ -7,6 +7,7 @@ import { t } from "../i18n.js";
 import { localizeErrorMessage } from "../localized-error.js";
 import { useAttachmentQueue } from "./useAttachmentQueue.js";
 import { createRoomSnapshotCache } from "../room-snapshot-cache.js";
+import { createMessageOutbox } from "../message-outbox.ts";
 
 const WS_CLOSE_UNAUTHORIZED = 4401;
 const WS_CLOSE_FORBIDDEN = 4403;
@@ -24,6 +25,9 @@ export function useChatRoom({
 	openRoomConnection = connectRoomSocket,
 }) {
 	const messages = ref([]);
+	const outbox = createMessageOutbox();
+	const visibleMessages = computed(() => [...messages.value,
+		...outbox.entries.value.filter(entry => entry.roomKey === roomKey()).map(entry => entry.message)]);
 	const pinnedMessage = ref(null);
 	const highlightedMessageId = ref(null);
 	const loading = ref(false);
@@ -66,6 +70,7 @@ export function useChatRoom({
 	function clearSessionState() {
 		sessionGeneration += 1;
 		snapshots.clear();
+		outbox.clear();
 		clearRoomState();
 		clearAttachments();
 		composerText.value = "";
@@ -159,6 +164,7 @@ export function useChatRoom({
 
 	function handleRoomAccessRevoked(key = roomKey()) {
 		snapshots.delete(key);
+		outbox.clear(key);
 		if (displayedRoomKey === key) {
 			clearRoomState();
 			disconnectSocket();
@@ -169,6 +175,11 @@ export function useChatRoom({
 	}
 
 	function handleSocketClose(event) {
+		for (const entry of outbox.entries.value) {
+			if (entry.roomKey === event.key && entry.message.sendStatus === "pending") {
+				outbox.fail(entry.frame.clientMessageId);
+			}
+		}
 		const code = Number(event?.code || 0);
 		const reason = String(event?.reason || "");
 		if (code === WS_CLOSE_UNAUTHORIZED || reason === WS_REASON_UNAUTHORIZED) {
@@ -188,6 +199,7 @@ export function useChatRoom({
 
 	function applyMessageEvent(payload) {
 		if (payload.type === "message" && payload.message) {
+			outbox.confirm(roomKey(), [payload.message]);
 			messages.value = mergeMessages(messages.value, [payload.message]);
 		}
 		if (payload.type === "message_deleted") {
@@ -209,6 +221,7 @@ export function useChatRoom({
 	}
 
 	function applyHistory(payload, read, append) {
+		outbox.confirm(roomKey(), payload.messages);
 		// Replace cached history so edits/deletions made while away cannot survive a refresh.
 		messages.value = append ? mergeMessages(payload.messages, messages.value) : payload.messages;
 		pinnedMessage.value = payload.pinnedMessage || null;
@@ -253,6 +266,7 @@ export function useChatRoom({
 			}
 			if (payload.type === "error") {
 				error.value = localizeErrorMessage(payload.error);
+				if (payload.clientMessageId) outbox.fail(payload.clientMessageId, error.value);
 			}
 		},
 	});
@@ -318,6 +332,7 @@ export function useChatRoom({
 	function deactivateRoom() {
 		// No active room also covers room deletion; never retain that room's snapshot.
 		snapshots.delete(displayedRoomKey);
+		outbox.clear(displayedRoomKey);
 		clearRoomState();
 		disconnectSocket();
 	}
@@ -343,6 +358,36 @@ export function useChatRoom({
 		roomSession.disconnect();
 	}
 
+	function transmit(entry) {
+		const id = entry.frame.clientMessageId;
+		outbox.start(id);
+		try {
+			if (!roomSession.send(JSON.stringify(entry.frame), entry.roomKey)) {
+				throw new Error(t('chat.realtimeNotReady'));
+			}
+		} catch (currentError) {
+			outbox.fail(id, currentError.message);
+		}
+	}
+
+	function queueMessage(key, payload) {
+		const frame = { type: "send", clientMessageId: crypto.randomUUID(), ...payload };
+		const sender = { id: session.value.userId, kind: "local", displayName: session.value.displayName,
+			avatarUrl: session.value.avatarUrl };
+		const reply = messages.value.find(message => Number(message.id) === frame.replyMessageId);
+		const entry = outbox.add(key, frame, sender, reply);
+		transmit(entry);
+		nextTick().then(scrollToBottom);
+	}
+
+	function retryMessage(clientMessageId) {
+		const entry = outbox.entries.value.find(item => item.roomKey === roomKey()
+			&& item.frame.clientMessageId === clientMessageId && item.message.sendStatus === "failed");
+		if (!entry) return;
+		error.value = "";
+		transmit(entry);
+	}
+
 	async function sendMessage(mentionUserIds = [], replyMessageId = null) {
 		const key = roomKey();
 		if (!roomSession.isOpenFor(key)) {
@@ -359,17 +404,12 @@ export function useChatRoom({
 		try {
 			const entries = pendingAttachments.value.length ? [...pendingAttachments.value] : [null];
 			for (const [index, entry] of entries.entries()) {
-				const sent = roomSession.send(
-					JSON.stringify({
-						type: "send",
-						content: index === 0 ? composerText.value : "",
-						attachment: entry?.attachment || null,
-						mentionUserIds: index === 0 ? mentionUserIds : [],
-						replyMessageId: replyMessageId ? Number(replyMessageId) : null,
-					}),
-					key,
-				);
-				if (!sent) throw new Error(t('chat.realtimeNotReady'));
+				queueMessage(key, {
+					content: index === 0 ? composerText.value : "",
+					attachment: entry?.attachment || null,
+					mentionUserIds: index === 0 ? mentionUserIds : [],
+					replyMessageId: replyMessageId ? Number(replyMessageId) : null,
+				});
 				composerText.value = "";
 				if (entry) clearAttachment(entry.id);
 			}
@@ -382,46 +422,43 @@ export function useChatRoom({
 		}
 	}
 
-		async function sendVoiceMessage(recording, replyMessageId = null) {
-			if (sending.value) return false;
-			const key = roomKey();
-			if (!roomSession.isOpenFor(key)) {
-				error.value = t('chat.realtimeNotReady');
-				return false;
-			}
-			sending.value = true;
-			error.value = "";
-			let attachment = null;
-			try {
-				const payload = await roomApi.uploadFile(recording.file);
-				attachment = {
-					...payload.file,
-					kind: "voice",
-					durationMs: recording.durationMs,
-					waveform: recording.waveform,
-				};
-				const sent = roomSession.send(
-					JSON.stringify({
-						type: "send",
-						content: "",
-						attachment,
-						mentionUserIds: [],
-						replyMessageId: replyMessageId ? Number(replyMessageId) : null,
-					}),
-					key,
-				);
-				if (!sent) throw new Error(t('chat.realtimeNotReady'));
-				return true;
-			} catch (currentError) {
-				if (roomKey() === key) {
-					if (attachment) addReadyAttachment(attachment);
-					error.value = currentError.message;
-				}
-				return false;
-			} finally {
-				sending.value = false;
-			}
+	async function sendVoiceMessage(recording, replyMessageId = null) {
+		if (sending.value) return false;
+		const key = roomKey();
+		const loginGeneration = sessionGeneration;
+		if (!roomSession.isOpenFor(key)) {
+			error.value = t('chat.realtimeNotReady');
+			return false;
 		}
+		sending.value = true;
+		error.value = "";
+		let attachment = null;
+		try {
+			const payload = await roomApi.uploadFile(recording.file);
+			if (roomKey() !== key || loginGeneration !== sessionGeneration || disposed) return false;
+			attachment = {
+				...payload.file,
+				kind: "voice",
+				durationMs: recording.durationMs,
+				waveform: recording.waveform,
+			};
+			queueMessage(key, {
+				content: "",
+				attachment,
+				mentionUserIds: [],
+				replyMessageId: replyMessageId ? Number(replyMessageId) : null,
+			});
+			return true;
+		} catch (currentError) {
+			if (roomKey() === key && loginGeneration === sessionGeneration) {
+				if (attachment) addReadyAttachment(attachment);
+				error.value = currentError.message;
+			}
+			return false;
+		} finally {
+			sending.value = false;
+		}
+	}
 
 	function deleteMessage(messageId) {
 		const key = activeRoom.value
@@ -540,7 +577,7 @@ export function useChatRoom({
 	if (getCurrentScope()) onScopeDispose(dispose);
 
 	return {
-		messages,
+		messages: visibleMessages,
 		pinnedMessage,
 		highlightedMessageId,
 		loading,
@@ -558,13 +595,14 @@ export function useChatRoom({
 		pauseRoom,
 		connectSocket,
 		disconnectSocket,
-			sendMessage,
-			sendVoiceMessage,
+		sendMessage,
+		retryMessage,
+		sendVoiceMessage,
 		deleteMessage,
 		pinMessage,
-			unpinMessage,
-			revealMessage,
-			revealPinnedMessage,
+		unpinMessage,
+		revealMessage,
+		revealPinnedMessage,
 		uploadAttachment,
 		clearAttachment,
 		retryAttachment,

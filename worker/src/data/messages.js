@@ -248,6 +248,17 @@ export async function getMessageById(env, messageId) {
 	return results[0] ? mapDecryptedMessage(env, results[0]) : null;
 }
 
+export async function getPinnedMessage(env, channelId) {
+	// 直接投影置顶消息，避免先读取 ID 再发起第二次数据库往返。
+	const { results } = await env.DB
+		.prepare(`${MESSAGE_SELECT}
+		 WHERE m.id = (SELECT message_id FROM channel_pins WHERE channel_id = ?)
+		   AND m.channel_id = ? AND m.deleted_at IS NULL LIMIT 1`)
+		.bind(Number(channelId), Number(channelId))
+		.all();
+	return results[0] ? mapDecryptedMessage(env, results[0]) : null;
+}
+
 export async function getMessageBySource(env, source, sourceMessageId) {
 	const { results } = await env.DB
 		.prepare(

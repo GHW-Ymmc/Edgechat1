@@ -7,7 +7,7 @@ function toNumber(value, fallback = 0) {
   return Number.isFinite(numeric) ? numeric : fallback;
 }
 
-export async function validateSession(env, token, { management = false } = {}) {
+export async function validateSession(env, token, { management = false, profile = false } = {}) {
   const session = await getSession(env, token);
   if (!session) {
     return { ok: false, status: 401, message: '请先登录' };
@@ -15,6 +15,7 @@ export async function validateSession(env, token, { management = false } = {}) {
 
   const { results } = await env.DB.prepare(
     `SELECT u.username, u.is_disabled, u.disabled_until, u.deleted_at, u.session_version, u.is_super_admin
+       ${profile ? ', u.display_name, u.avatar_key, u.bio' : ''}
        ${management ? `, ${AUTHORIZATION_COLUMNS}` : ''}
      FROM users u ${management ? AUTHORIZATION_JOIN : ''}
      WHERE u.id = ?
@@ -57,13 +58,22 @@ export async function validateSession(env, token, { management = false } = {}) {
 
   const refreshed = {
     ...session,
+    ...(profile ? {
+      username: user.username,
+      displayName: user.display_name,
+      bio: user.bio ?? '',
+      avatarUrl: user.avatar_key ? `/files/${encodeURIComponent(user.avatar_key)}` : ''
+    } : {}),
     isAdmin: isAdminUser(env, user),
     isSuperAdmin: Boolean(user.is_super_admin),
     ...(management ? authorizationFromRow(user) : {}),
     sessionVersion: dbVersion
   };
 
-  if (refreshed.isAdmin !== session.isAdmin || refreshed.sessionVersion !== session.sessionVersion) {
+  // 恢复接口直接复用本次鉴权的最新资料；仅资料确实改变时写回，避免每次启动续写 KV。
+  const profileChanged = profile && ['username', 'displayName', 'bio', 'avatarUrl']
+    .some((key) => refreshed[key] !== session[key]);
+  if (profileChanged || refreshed.isAdmin !== session.isAdmin || refreshed.sessionVersion !== session.sessionVersion) {
     await putSession(env, refreshed);
   }
 

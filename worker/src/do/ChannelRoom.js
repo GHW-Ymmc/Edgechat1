@@ -1,6 +1,5 @@
 import {
   MessageSubmissionError,
-  submitRoomMessage,
   submitRoomMessageIdempotent
 } from '../message-submission.js';
 import { deleteRoomMessage, MessageDeletionError } from '../message-deletion.js';
@@ -29,9 +28,9 @@ function socketMeta(token, principal, room) {
   };
 }
 
-function sendSocketError(ws, message) {
+function sendSocketError(ws, message, clientMessageId) {
   try {
-    ws.send(JSON.stringify({ protocolVersion: 1, type: 'error', error: message }));
+    ws.send(JSON.stringify({ protocolVersion: 1, type: 'error', error: message, clientMessageId }));
   } catch {
     // Ignore broken sockets.
   }
@@ -380,21 +379,30 @@ export class ChannelRoom {
         return;
       }
 
-      const { message: saved, packet } = await submitRoomMessage(
+      if (payload.clientMessageId !== undefined && (typeof payload.clientMessageId !== 'string'
+        || !/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(payload.clientMessageId))) {
+        throw new MessageSubmissionError('clientMessageId 必须是 UUID');
+      }
+      const result = await submitRoomMessageIdempotent(
         this.env,
         currentMeta,
         payload
       );
-      await this.broadcast(packet);
+      if (!result.created) {
+        // 重试只向发送连接补确认，避免重复未读、桥接和其他客户端的新消息事件。
+        ws.send(result.packet);
+        return;
+      }
+      await this.broadcast(result.packet);
       // 未读与外部桥接都属于提交后投影，异步执行以缩短 WebSocket 发送链路。
-      this.runMessageProjections(currentMeta.room, saved);
+      this.runMessageProjections(currentMeta.room, result.message, result.replyToSenderId);
     } catch (error) {
       if (
         error instanceof MessageSubmissionError ||
         error instanceof MessageDeletionError ||
         error instanceof MessagePinningError
       ) {
-        sendSocketError(ws, error.message);
+        sendSocketError(ws, error.message, payload.type === 'send' ? payload.clientMessageId : undefined);
         return;
       }
       console.error(JSON.stringify({
@@ -402,7 +410,7 @@ export class ChannelRoom {
         roomId: Number(meta.room?.id || 0),
         error: error instanceof Error ? error.message : String(error)
       }));
-      sendSocketError(ws, '消息操作失败');
+      sendSocketError(ws, '消息操作失败', payload.type === 'send' ? payload.clientMessageId : undefined);
     }
   }
 

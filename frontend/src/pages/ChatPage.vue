@@ -164,7 +164,7 @@ const {
 	  loadMessages, activateRoom, deactivateRoom, pauseRoom, disconnectSocket, sendMessage, sendVoiceMessage, deleteMessage,
 	  pinMessage, unpinMessage, revealPinnedMessage,
 	  revealMessage,
-  uploadAttachment, clearAttachment, retryAttachment, loadOlder
+  uploadAttachment, clearAttachment, retryAttachment, retryMessage, loadOlder
 } = useChatRoom({
   activeRoom,
   session,
@@ -816,6 +816,7 @@ watch(
             :is-direct="activeRoom.kind === 'dm'"
             :highlighted-message-id="highlightedMessageId"
             @profile="openSenderProfile"
+            @retry="retryMessage"
             @reveal="revealMessage"
             @contextmenu="openMessageContextMenu"
             @long-press="startMessageLongPress"
