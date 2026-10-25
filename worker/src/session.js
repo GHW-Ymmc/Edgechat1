@@ -1,49 +1,27 @@
 import { deleteSession, getSession, isAdminUser, putSession } from './auth.js';
 import { isUserDisabled } from './user-status.js';
-import { AUTHORIZATION_COLUMNS, AUTHORIZATION_JOIN, authorizationFromRow } from './rbac/authorization.ts';
+import { authorizationFromRow } from './rbac/authorization.ts';
+import { readSessionState } from './data/session-state.ts';
 
 function toNumber(value, fallback = 0) {
   const numeric = Number(value);
   return Number.isFinite(numeric) ? numeric : fallback;
 }
 
-export async function validateSession(env, token, { management = false, profile = false } = {}) {
+export async function validateSession(env, token, { management = false, profile = false, room = null } = {}) {
   const session = await getSession(env, token);
   if (!session) {
     return { ok: false, status: 401, message: '请先登录' };
   }
 
-  const { results } = await env.DB.prepare(
-    `SELECT u.username, u.is_disabled, u.disabled_until, u.deleted_at, u.session_version, u.is_super_admin
-       ${profile ? ', u.display_name, u.avatar_key, u.bio' : ''}
-       ${management ? `, ${AUTHORIZATION_COLUMNS}` : ''}
-     FROM users u ${management ? AUTHORIZATION_JOIN : ''}
-     WHERE u.id = ?
-     LIMIT 1`
-  )
-    .bind(session.userId)
-    .all();
-
-  const user = results[0];
+  const user = await readSessionState(env.DB, session, { management, profile, room });
   if (!user || user.deleted_at || isUserDisabled(user)) {
     await deleteSession(env, token);
     return { ok: false, status: 401, message: '账号已不可用' };
   }
 
   if (session.deviceSessionId) {
-    const device = await env.DB.prepare(
-      `SELECT session_version
-       FROM device_sessions
-       WHERE id = ?
-         AND user_id = ?
-         AND revoked_at IS NULL
-         AND expires_at > CURRENT_TIMESTAMP
-       LIMIT 1`
-    )
-      .bind(String(session.deviceSessionId), session.userId)
-      .all();
-    const deviceSession = device.results[0];
-    if (!deviceSession || toNumber(deviceSession.session_version) !== toNumber(user.session_version)) {
+    if (user.device_session_version == null || toNumber(user.device_session_version) !== toNumber(user.session_version)) {
       await deleteSession(env, token);
       return { ok: false, status: 401, message: '设备登录已失效，请重新登录' };
     }
@@ -54,6 +32,11 @@ export async function validateSession(env, token, { management = false, profile 
   if (sessionVersion !== dbVersion) {
     await deleteSession(env, token);
     return { ok: false, status: 401, message: '登录已过期，请重新登录' };
+  }
+
+  if (room && !user.room_id) {
+    // 退群只撤销当前房间访问，不能顺带销毁仍可访问其他会话的登录凭据。
+    return { ok: false, status: 403, message: '无权访问该会话' };
   }
 
   const refreshed = {
@@ -77,6 +60,17 @@ export async function validateSession(env, token, { management = false, profile 
     await putSession(env, refreshed);
   }
 
-  return { ok: true, session: refreshed };
+  return {
+    ok: true,
+    session: refreshed,
+    ...(room ? { room: {
+      id: user.room_id,
+      name: user.room_name,
+      description: user.room_description,
+      avatar_key: user.room_avatar_key,
+      kind: user.room_kind,
+      dm_key: user.room_dm_key
+    } } : {})
+  };
 }
 

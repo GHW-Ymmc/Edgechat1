@@ -21,12 +21,16 @@ export function createMessageSubmission({
 } = {}) {
 	return async function submitRoomMessage(env, meta, payload) {
 		try {
+			// 拉黑门禁与幂等读取互不依赖；仍先判定门禁，不能用重试确认绕过拉黑。
+			const [blockStatus, existingMessage] = await Promise.all([
+				meta.room.kind === "dm"
+					? resolveDmBlockStatus(env.DB, Number(meta.room.id), Number(meta.principal.userId))
+					: null,
+				findMessage && payload.clientMessageId
+					? findMessage(env, meta.room.id, meta.principal.userId, payload.clientMessageId)
+					: null,
+			]);
 			if (meta.room.kind === "dm") {
-				const blockStatus = await resolveDmBlockStatus(
-					env.DB,
-					Number(meta.room.id),
-					Number(meta.principal.userId),
-				);
 				if (blockStatus.blockedByPeer) {
 					throw new MessageSubmissionError(
 						"发送被拒，你已经被拉黑",
@@ -43,11 +47,10 @@ export function createMessageSubmission({
 				}
 			}
 			// 确认丢失后的重试必须先返回原消息；回复目标可能已经被删除，不能再次校验旧内容。
-			if (findMessage && payload.clientMessageId) {
-				const message = await findMessage(env, meta.room.id, meta.principal.userId, payload.clientMessageId);
-				if (message) return {
-					message, created: false,
-					packet: JSON.stringify({ protocolVersion: 1, type: "message", message }),
+			if (existingMessage) {
+				return {
+					message: existingMessage, created: false,
+					packet: JSON.stringify({ protocolVersion: 1, type: "message", message: existingMessage }),
 				};
 			}
 			const [mentionUserIds, reply] = await Promise.all([
