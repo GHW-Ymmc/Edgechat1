@@ -2,6 +2,12 @@
 
 EdgeChat 从 `2.1.2` 起正式采用语义化版本。更早的版本号依据已经完成的主要里程碑补记，用于说明项目演进，不对应历史 Git 标签。
 
+## 2.19.0 - 2026-10-28
+
+- 后台「集成」新增超管专属的「登录验证」，Cloudflare Turnstile 默认关闭；开启后每次密码提交均先完成新挑战和 Siteverify 校验，普通网页、隐身入口与 API v1 共用服务端规则，不累计失败次数、不增加风控数据库写入。
+- 默认启用 Workers Rate Limiting API：每 IP 每分钟 10 次密码登录、120 次普通 API 请求；集成回调不占普通 API 配额，WebSocket 帧不在此限流范围。计数由 Cloudflare 边缘维护，不使用 D1/KV。
+- Secret Key 通过 Wrangler Secret 或可选同名 Actions Secret 注入，后台仅保存开关与公开 Site Key；复用 site_settings，无新迁移。同步三语言、demo、部署模板和回归测试，未修改 Android；不支持 Turnstile 的旧客户端在开启后无法新登录。
+
 ## 2.18.3 - 2026-10-24
 
 - 整理并提交部署维护文档：区分 D1 新装基线登记与旧库升级，补充误执行历史迁移后的只读排查步骤，明确不要盲目重建数据库或移除触发器。

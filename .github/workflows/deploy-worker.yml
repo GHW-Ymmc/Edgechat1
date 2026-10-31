@@ -175,6 +175,16 @@ jobs:
             printf '%s' "$EDGECHAT_TURN_KEY_ID" | npx wrangler secret put EDGECHAT_TURN_KEY_ID --config wrangler.ci.toml
             printf '%s' "$EDGECHAT_TURN_API_TOKEN" | npx wrangler secret put EDGECHAT_TURN_API_TOKEN --config wrangler.ci.toml
           fi
+      - name: Configure Turnstile secret (optional)
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          EDGECHAT_TURNSTILE_SECRET_KEY: ${{ secrets.EDGECHAT_TURNSTILE_SECRET_KEY }}
+        shell: bash
+        run: |
+          if [[ -n "$EDGECHAT_TURNSTILE_SECRET_KEY" ]]; then
+            printf '%s' "$EDGECHAT_TURNSTILE_SECRET_KEY" | npx wrangler secret put EDGECHAT_TURNSTILE_SECRET_KEY --config wrangler.ci.toml
+          fi
       - name: Remove temporary secret files
         if: always()
         shell: bash

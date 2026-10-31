@@ -184,6 +184,8 @@ Fork 後、自分のリポジトリの **Actions** を開き、GitHub の案内�
 
 ドキュメントに従って Cloudflare の認証とリポジトリ設定を完了すると、`00 Deploy Worker` を手動実行できます。また、`master` または `main` ブランチにコードをプッシュしてデプロイをトリガーすることもできます。ワークフローファイルは `.github/workflows/deploy-worker.yml` です。
 
+Workers のネイティブレート制限は既定で有効です。Cloudflare Turnstile のログイン認証は既定で無効で、管理画面の「連携 → ログイン認証」で有効化できます。Secret、手動デプロイの binding と旧クライアントの互換性は[設定ガイド](docs/login-verification.md)を参照してください。
+
 **[クイックスタート](https://echat.azora.top/guide/getting-started.html) · [GitHub Actions デプロイチュートリアル](https://echat.azora.top/guide/actions-deploy.html)**
 
 ### 手動デプロイと Docker

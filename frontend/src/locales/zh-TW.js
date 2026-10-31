@@ -1,6 +1,8 @@
 import bridge from './instance-bridge/zh-TW.js';
 import rbac from './rbac/zh-TW.js';
+import verification from './login-verification/zh-TW.js';
 export default {
+  ...verification,
   'maintenance.telegramNotifications': 'TelegramNotifications DO',
   'maintenance.method.telegramNotifications': 'TELEGRAM_NOTIFICATIONS binding + 內部 health 請求',
   ...rbac,

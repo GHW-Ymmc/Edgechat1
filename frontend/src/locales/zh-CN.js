@@ -2,7 +2,9 @@ import maintenanceZh from './maintenance/zh-CN.js';
 import bridge from './instance-bridge/zh-CN.js';
 
 import rbac from './rbac/zh-CN.js';
+import verification from './login-verification/zh-CN.js';
 export default {
+  ...verification,
   ...rbac,
   'call.limit': '本次通话已达到 1 小时上限，请重新呼叫。',
   'stealth.title': '隐身模式',

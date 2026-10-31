@@ -193,6 +193,8 @@ After forking, open **Actions** in your own repository, enable workflows when Gi
 
 After completing the Cloudflare authorization and repository configuration described in the documentation, you can manually run `00 Deploy Worker`, or trigger deployment by pushing code to the `master` or `main` branch. The workflow file is `.github/workflows/deploy-worker.yml`.
 
+Workers-native rate limiting is enabled by default. Optional Cloudflare Turnstile login verification is off by default and can be enabled under Admin → Integrations → Login Verification. See [configuration and client compatibility](docs/login-verification.md) for Secrets and manual deployment bindings.
+
 **[Quick Start](https://echat.azora.top/guide/getting-started.html) · [GitHub Actions Deployment Guide](https://echat.azora.top/guide/actions-deploy.html)**
 
 ### Manual Deployment and Docker

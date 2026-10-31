@@ -2,7 +2,9 @@ import maintenanceEn from './maintenance/en-US.js';
 import bridge from './instance-bridge/en-US.js';
 
 import rbac from './rbac/en-US.js';
+import verification from './login-verification/en-US.js';
 export default {
+  ...verification,
   ...rbac,
   'call.limit': 'The one-hour call limit was reached. Please call again.',
   'call.voice': 'Voice call',

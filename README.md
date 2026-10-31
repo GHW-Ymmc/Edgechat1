@@ -193,6 +193,8 @@ Fork 后首次进入自己的仓库 `Actions` 页面，先按 GitHub 提示启�
 
 按照文档完成 Cloudflare 授权与仓库配置后，可以手动运行 `00 Deploy Worker`，也可以通过向 `master` 或 `main` 分支推送代码触发部署。工作流文件为 `.github/workflows/deploy-worker.yml`。
 
+登录默认启用 Workers 原生限流；可选的 Cloudflare Turnstile 登录验证默认关闭，在后台「集成 → 登录验证」开启。配置 Secret、手动部署 binding 和旧客户端兼容边界见[登录验证与限流](docs/login-verification.md)。
+
 **[快速开始](https://echat.azora.top/guide/getting-started.html) · [GitHub Actions 部署教程](https://echat.azora.top/guide/actions-deploy.html)**
 
 ### 手动部署与 Docker

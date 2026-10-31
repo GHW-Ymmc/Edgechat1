@@ -24,6 +24,17 @@ ORPHAN_UPLOAD_RETENTION_DAYS = "1"
 ALLOWED_FILE_TYPES = "image/,video/,audio/,application/pdf,text/"
 MAX_FILE_SIZE = "20971520"
 
+# 原生边缘计数不写 D1/KV；相同账户的其他应用应使用不同 namespace_id。
+[[ratelimits]]
+name = "LOGIN_RATE_LIMITER"
+namespace_id = "218401"
+simple = { limit = 10, period = 60 }
+
+[[ratelimits]]
+name = "API_RATE_LIMITER"
+namespace_id = "218402"
+simple = { limit = 120, period = 60 }
+
 [[d1_databases]]
 binding = "DB"
 # Legacy D1 resource name kept intentionally; do not rename without a data migration plan.
